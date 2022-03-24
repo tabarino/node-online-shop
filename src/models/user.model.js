@@ -25,6 +25,11 @@ class User {
     });
   }
 
+  async isAlreadyCreated () {
+    const existingUser = await this.getUserSameEmail();
+    return !!existingUser;
+  }
+
   getUserSameEmail () {
     return db.getDbConn().collection('users').findOne({ email: this.email });
   }

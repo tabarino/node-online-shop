@@ -1,21 +1,65 @@
 const User = require('../models/user.model');
 const authUtil = require('../util/authentication');
+const userDetailsAreValid = require('../util/validation');
+const sessionFlash = require('../util/session-flash');
 
 function getSignup (req, res) {
-  res.render('customer/auth/signup');
+  let sessionData = sessionFlash.getSessionData(req);
+  if (!sessionData) {
+    sessionData = {
+      email: '',
+      confirmEmail: '',
+      password: '',
+      fullname: '',
+      street: '',
+      city: '',
+      postal: ''
+    }
+  }
+  res.render('customer/auth/signup', { inputData: sessionData });
 }
 
 async function signup (req, res, next) {
+  const enteredData = {
+    email: req.body.email,
+    confirmEmail: req.body['confirm-email'],
+    password: req.body.password,
+    fullname: req.body.fullname,
+    street: req.body.street,
+    city: req.body.city,
+    postal: req.body.postal
+  }
+
+  if (!userDetailsAreValid(enteredData)) {
+    sessionFlash.flashDataToSession(req, {
+      errorMessage: 'Please check your input. Password must be at least 6 characters long!',
+      ...enteredData
+    }, () => {
+      res.redirect('/signup');
+    });
+    return;
+  }
+
   const user = new User(
-    req.body.email,
-    req.body.password,
-    req.body.fullname,
-    req.body.street,
-    req.body.city,
-    req.body.postal
+    enteredData.email,
+    enteredData.password,
+    enteredData.fullname,
+    enteredData.street,
+    enteredData.city,
+    enteredData.postal
   );
 
   try {
+    const existingUser = await user.isAlreadyCreated();
+    if (existingUser) {
+      sessionFlash.flashDataToSession(req, {
+        errorMessage: 'User exists already! Try logging in instead!',
+        ...enteredData
+      }, () => {
+        res.redirect('/signup');
+      });
+      return;
+    }
     await user.signup();
   } catch (e) {
     next(e);
@@ -26,7 +70,14 @@ async function signup (req, res, next) {
 }
 
 function getLogin (req, res) {
-  res.render('customer/auth/login');
+  let sessionData = sessionFlash.getSessionData(req);
+  if (!sessionData) {
+    sessionData = {
+      email: '',
+      password: '',
+    }
+  }
+  res.render('customer/auth/login', { inputData: sessionData });
 }
 
 async function login (req, res, next) {
@@ -40,8 +91,16 @@ async function login (req, res, next) {
     return;
   }
 
+  const sessionErrorData = {
+    errorMessage: 'Invalid credentials! Please double check you email and password!',
+    email: user.email,
+    password: user.password
+  };
+
   if (!existingUser) {
-    res.redirect('/login');
+    sessionFlash.flashDataToSession(req, sessionErrorData, () => {
+      res.redirect('/login');
+    });
     return;
   }
 
@@ -54,7 +113,9 @@ async function login (req, res, next) {
   }
 
   if (!matchedPassword) {
-    res.redirect('/login');
+    sessionFlash.flashDataToSession(req, sessionErrorData, () => {
+      res.redirect('/login');
+    });
     return;
   }
 
