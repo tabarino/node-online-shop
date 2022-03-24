@@ -1,3 +1,5 @@
+const mongodb = require('mongodb');
+
 const db = require('../data/database');
 
 class Product {
@@ -17,6 +19,26 @@ class Product {
   static async findAll () {
     const products = await db.getDbConn().collection('products').find().toArray();
     return products.map(productDocument => new Product(productDocument));
+  }
+
+  static async findById (id) {
+    let productId;
+    try {
+      productId = new mongodb.ObjectId(id);
+    } catch (e) {
+      e.code = 404;
+      throw e;
+    }
+
+    const product = await db.getDbConn().collection('products').findOne({ _id: productId });
+
+    if (!product) {
+      const error = new Error('Could not find product with id provided.');
+      error.code = 404;
+      throw error;
+    }
+
+    return product;
   }
 
   async save() {

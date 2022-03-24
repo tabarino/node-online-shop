@@ -13,6 +13,15 @@ function getNewProduct (req, res) {
   res.render('admin/products/new-product');
 }
 
+async function getUpdateProduct (req, res, next) {
+  try {
+    const product = await Product.findById(req.params.id);
+    res.render('admin/products/update-product', { product })
+  } catch (e) {
+    next(e);
+  }
+}
+
 async function createNewProduct (req, res, next) {
   const product = new Product({ ...req.body, image: req.file.filename });
 
@@ -26,8 +35,14 @@ async function createNewProduct (req, res, next) {
   res.redirect('/admin/products');
 }
 
+function updateProduct (req, res) {
+
+}
+
 module.exports = {
   getProducts: getProducts,
   getNewProduct: getNewProduct,
-  createNewProduct: createNewProduct
+  getUpdateProduct: getUpdateProduct,
+  createNewProduct: createNewProduct,
+  updateProduct: updateProduct
 };
