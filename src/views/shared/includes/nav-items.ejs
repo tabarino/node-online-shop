@@ -1,6 +1,8 @@
 <ul class="nav-items">
-  <li><a href="/">Shop</a></li>
-  <li><a href="/cart">Cart</a></li>
+  <% if (!locals.isAdmin) { %>
+    <li><a href="/">Shop</a></li>
+    <li><a href="/cart">Cart</a></li>
+  <% } %>
 
   <% if (locals.isAuth && !locals.isAdmin) { %>
     <li><a href="/orders">Orders</a></li>
