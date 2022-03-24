@@ -5,7 +5,7 @@ function getSignup (req, res) {
   res.render('customer/auth/signup');
 }
 
-async function signup (req, res) {
+async function signup (req, res, next) {
   const user = new User(
     req.body.email,
     req.body.password,
@@ -15,7 +15,12 @@ async function signup (req, res) {
     req.body.postal
   );
 
-  await user.signup();
+  try {
+    await user.signup();
+  } catch (e) {
+    next(e);
+    return;
+  }
 
   res.redirect('/login');
 }
@@ -24,16 +29,29 @@ function getLogin (req, res) {
   res.render('customer/auth/login');
 }
 
-async function login (req, res) {
+async function login (req, res, next) {
   const user = new User(req.body.email, req.body.password);
-  const existingUser = await user.getUserSameEmail();
+
+  let existingUser;
+  try {
+    existingUser = await user.getUserSameEmail();
+  } catch (e) {
+    next(e);
+    return;
+  }
 
   if (!existingUser) {
     res.redirect('/login');
     return;
   }
 
-  const matchedPassword = await user.hasMatchingPassword(existingUser.password);
+  let matchedPassword;
+  try {
+    matchedPassword = await user.hasMatchingPassword(existingUser.password);
+  } catch (e) {
+    next(e);
+    return;
+  }
 
   if (!matchedPassword) {
     res.redirect('/login');
