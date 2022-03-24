@@ -9,8 +9,7 @@ class Product {
     this.description = productData.description;
     this.price = +productData.price;
     this.image = productData.image;
-    this.imagePath = `product-data/images/${this.image}`;
-    this.imageUrl = `/products/assets/images/${this.image}`;
+    this.updateImageData();
     if (productData._id) {
       this.id = productData._id.toString();
     }
@@ -38,10 +37,10 @@ class Product {
       throw error;
     }
 
-    return product;
+    return new Product(product);
   }
 
-  async save() {
+  async save () {
     const productData = {
       title: this.title,
       summary: this.summary,
@@ -49,7 +48,30 @@ class Product {
       price: this.price,
       image: this.image
     }
-    await db.getDbConn().collection('products').insertOne(productData);
+
+    console.log(productData)
+
+    if (this.id) {
+      const productId = new mongodb.ObjectId(this.id);
+
+      if (!this.image) {
+        delete productData.image;
+      }
+
+      await db.getDbConn().collection('products').updateOne({ _id: productId }, { $set: productData });
+    } else {
+      await db.getDbConn().collection('products').insertOne(productData);
+    }
+  }
+
+  updateImageData () {
+    this.imagePath = `product-data/images/${this.image}`;
+    this.imageUrl = `/products/assets/images/${this.image}`;
+  }
+
+  replaceImage (newImage) {
+    this.image = newImage;
+    this.updateImageData();
   }
 }
 

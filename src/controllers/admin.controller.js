@@ -35,8 +35,21 @@ async function createNewProduct (req, res, next) {
   res.redirect('/admin/products');
 }
 
-function updateProduct (req, res) {
+async function updateProduct (req, res, next) {
+  const product = new Product({ ...req.body, _id: req.params.id });
 
+  if (req.file) {
+    product.replaceImage(req.file.filename);
+  }
+
+  try {
+    await product.save();
+  } catch (e) {
+    next(e);
+    return;
+  }
+
+  res.redirect('/admin/products');
 }
 
 module.exports = {

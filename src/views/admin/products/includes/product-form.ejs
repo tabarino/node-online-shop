@@ -17,7 +17,7 @@
   </p>
   <p>
     <label for="product-image">Image</label>
-    <input type="file" id="product-image" name="product-image" accept="image/png, image/jpg" required>
+    <input type="file" id="product-image" name="product-image" accept="image/png, image/jpg" <% if (imageRequired) { %> required <% } %>>
   </p>
   <p>
     <button type="reset" class="btn btn-alt">Reset</button>
