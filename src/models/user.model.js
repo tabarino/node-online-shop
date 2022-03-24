@@ -24,6 +24,14 @@ class User {
       address: this.address
     });
   }
+
+  getUserSameEmail () {
+    return db.getDbConn().collection('users').findOne({ email: this.email });
+  }
+
+  hasMatchingPassword (hashedPassword) {
+    return bcrypt.compare(this.password, hashedPassword);
+  }
 }
 
 module.exports = User;

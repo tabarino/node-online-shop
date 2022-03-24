@@ -7,8 +7,11 @@ const csrf = require('csurf');
 const createSessionConfig = require('./config/session');
 const db = require('./data/database');
 const addCsrfTokenMiddleware = require('./middlewares/csrf-token');
-const errorHandlerMiddleware = require('./middlewares/error-handler')
+const errorHandlerMiddleware = require('./middlewares/error-handler');
+const checkAuthStatusMiddleware = require('./middlewares/check-auth');
 const authRoutes = require('./routes/auth.routes');
+const productsRoutes = require('./routes/products.routes');
+const baseRoutes = require('./routes/base.routes');
 
 const app = express();
 
@@ -25,7 +28,11 @@ app.use(cookieParser())
 app.use(csrf({ cookie: true }));
 app.use(addCsrfTokenMiddleware);
 
+app.use(checkAuthStatusMiddleware);
+
+app.use(baseRoutes);
 app.use(authRoutes);
+app.use(productsRoutes);
 
 app.use(errorHandlerMiddleware);
 
