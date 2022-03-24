@@ -64,6 +64,11 @@ class Product {
     }
   }
 
+  async remove() {
+    const productId = new mongodb.ObjectId(this.id);
+    await db.getDbConn().collection('products').deleteOne({ _id: productId })
+  }
+
   updateImageData () {
     this.imagePath = `product-data/images/${this.image}`;
     this.imageUrl = `/products/assets/images/${this.image}`;
