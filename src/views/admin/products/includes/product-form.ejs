@@ -15,10 +15,13 @@
     <label for="price">Price</label>
     <input type="number" id="price" name="price" value="<%= product.price %>" step="0.01" min="0.01" required>
   </p>
-  <p>
-    <label for="product-image">Image</label>
-    <input type="file" id="product-image" name="product-image" accept="image/png, image/jpg" <% if (imageRequired) { %> required <% } %>>
-  </p>
+  <div id="image-upload-control">
+    <p>
+      <label for="product-image">Image</label>
+      <input type="file" id="product-image" name="product-image" accept="image/png, image/jpg" <% if (imageRequired) { %> required <% } %>>
+    </p>
+    <img src="" alt="Selected Image">
+  </div>
   <p>
     <button type="reset" class="btn btn-alt">Reset</button>
     <button type="submit" class="btn">Save</button>
