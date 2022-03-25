@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const mongodb = require('mongodb');
 
 const db = require('../data/database');
 
@@ -28,6 +29,28 @@ class User {
   async isAlreadyCreated () {
     const existingUser = await this.getUserSameEmail();
     return !!existingUser;
+  }
+
+  static async findById (userId) {
+    let uid;
+    try {
+      uid = new mongodb.ObjectId(userId);
+    } catch (e) {
+      e.code = 404;
+      throw e;
+    }
+
+    const user = await db.getDbConn().collection('users').findOne({ _id: uid }, { projection: { password: 0 } });
+
+    console.log(user);
+
+    if (!user) {
+      const error = new Error('Could not find the user with the id provided.');
+      error.code = 404;
+      throw error;
+    }
+
+    return user;
   }
 
   getUserSameEmail () {
