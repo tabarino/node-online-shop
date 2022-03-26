@@ -40,6 +40,12 @@ class Product {
     return new Product(product);
   }
 
+  static async findMultiple (ids) {
+    const productIds = ids.map(id => new mongodb.ObjectId(id));
+    const products = await db.getDbConn().collection('products').find({ _id: { $in: productIds } }).toArray();
+    return products.map(productDocument => new Product(productDocument));
+  }
+
   async save () {
     const productData = {
       title: this.title,
@@ -48,8 +54,6 @@ class Product {
       price: this.price,
       image: this.image
     }
-
-    console.log(productData)
 
     if (this.id) {
       const productId = new mongodb.ObjectId(this.id);
@@ -64,7 +68,7 @@ class Product {
     }
   }
 
-  async remove() {
+  async remove () {
     const productId = new mongodb.ObjectId(this.id);
     await db.getDbConn().collection('products').deleteOne({ _id: productId })
   }
